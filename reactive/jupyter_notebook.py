@@ -89,7 +89,6 @@ def restart_notebook():
     # anywhere else then localhost.
     host.service_stop('jupyter-notebook')
     # Wait until notebook shut down completely.
-    #TODO: do this better.
     import time
     time.sleep(10)
     host.service_start('jupyter-notebook')
