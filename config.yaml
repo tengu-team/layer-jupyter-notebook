@@ -6,3 +6,4 @@ options:
   pip3-dependencies:
     type: string
     default: "matplotlib pandas"
+    description: "Python 3 pip dependencies to be installed together with the notebook"

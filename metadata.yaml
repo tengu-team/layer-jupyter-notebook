@@ -10,4 +10,4 @@ subordinate: false
 provides:
   website:
     interface: http
-series: ['trusty']
+series: ['xenial', 'trusty']

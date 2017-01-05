@@ -1,18 +1,31 @@
 # Overview
 
-This Charm deploys the [Jupyter notebook](http://jupyter.org) and randomly generates [an easy to remember password](https://xkcd.com/936/).
+This Charm deploys the [Jupyter notebook](http://jupyter.org) including the python3 kernel.The notebook is protected using an automatically-generated [easy to remember password](https://xkcd.com/936/).
 
 The Jupyter Notebook is a web application that allows you to create and share documents that contain live code, equations, visualizations and explanatory text. Uses include: data cleaning and transformation, numerical simulation, statistical modeling, machine learning and much more.
 
 # Usage
 
-This Charm deploys the Jupyter notebook and shows the generated password as part of the status message. You can see the password by running `juju status` or looking at the details of the deployed unit in the Juju GUI.
+Deploy the notebook.
+
+```bash
+juju deploy cs:~tengu-team/jupyter-notebook-spark
+```
+
+After deployment is complete, you can see the password in the status message. Run `juju status` or look at the details of the notebook unit to get the password.
 
 ```
 $juju status
 Unit                 Workload  Agent  Machine   Public address  Ports     Message
 jupyter-notebook/0   active    idle   0         192.168.0.1     8888/tcp  Ready (Pass: "shmuck technical eschew Aqaba")
 ```
+
+Open https://<public-address>:<open-port> in your browser, login using the password and you're ready to go!.
+
+# Config options
+
+The `pip3-dependencies` config option lets you install additional python3-pip dependencies. Use this if you want to install additional kernels.
+
 
 # Contact Information
 

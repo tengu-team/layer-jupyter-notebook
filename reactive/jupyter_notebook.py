@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=c0111,c0103,c0301
+import lsb_release
+import subprocess
+
 from charmhelpers.core import templating, hookenv, host, unitdata
 from charmhelpers.core.host import chownr
 from charmhelpers.contrib.python.packages import pip_install
@@ -60,10 +63,12 @@ def configure_jupyter_notebook():
     port = conf['open-port']
     # Get or create and get password
     kv_store = unitdata.kv()
-    password = str(kv_store.get('password'))
+    password = kv_store.get('password')
     if not password:
         password = generate_password()
         kv_store.set('password', password)
+    # Convert to string because some functions can't handle kv object type.
+    password = str(password)
     password_hash = generate_hash(password)
     context = {
         'port': port,
@@ -78,7 +83,11 @@ def configure_jupyter_notebook():
             context=context
         )
         # Generate upstart template / service file
-        render_api_upstart_template()
+        context = {}
+        if lsb_release.get_lsb_information()['RELEASE'] == "14.04":
+            render_api_upstart_template(context)
+        else:
+            render_api_systemd_template(context)
         restart_notebook()
     chownr(jupyter_dir, 'ubuntu', 'ubuntu', chowntopdir=True)
 
@@ -91,7 +100,8 @@ def restart_notebook():
     # Wait until notebook shut down completely.
     import time
     time.sleep(10)
-    host.service_start('jupyter-notebook')
+    # service_resume also enables the serivice on startup
+    host.service_resume('jupyter-notebook')
     if host.service_running('jupyter-notebook'):
         status_set('active',
                    'Ready (Pass: "{}")'.format(unitdata.kv().get('password')))
@@ -102,12 +112,21 @@ def restart_notebook():
                    'Could not restart service due to wrong configuration!')
 
 
-def render_api_upstart_template():
+def render_api_upstart_template(context):
     templating.render(
         source='jupyter-notebook.conf.jinja2',
         target='/etc/init/jupyter-notebook.conf',
-        context={}
+        context=context
         )
+
+
+def render_api_systemd_template(context):
+    templating.render(
+        source='jupyter-notebook.service.jinja2',
+        target='/etc/systemd/system/jupyter-notebook.service',
+        context=context
+        )
+    subprocess.check_call(['systemctl', 'daemon-reload'])
 
 #
 # Helper functions
