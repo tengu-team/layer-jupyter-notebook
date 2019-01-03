@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # pylint: disable=c0111,c0103,c0301
+import os
 import lsb_release
 import subprocess
 
@@ -31,12 +32,12 @@ def upgrade_charm():
     pip_install('jupyter', upgrade=True)
 
 
-@when('apt.installed.python3-pip')
 @when_not('jupyter-notebook.installed')
 def install_jupyter_notebook():
     hookenv.log("Install Jupyter-notebook")
-    pip_install('pip', upgrade=True)
+    os.environ["LC_ALL"] = "en_US.UTF-8" # Needed for the xkcdpass module
     pip_install('jupyter')
+    pip_install('xkcdpass')    
     set_state('jupyter-notebook.installed')
 
 
